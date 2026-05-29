@@ -33,9 +33,10 @@ interface RateTableProps {
   refreshInflight?: boolean
   error: string | undefined
   onSelectAnchor: (rate: AnchorRate) => void
+  executeDisabled?: boolean
 }
 
-export function RateTable({ rates, isLoading, refreshInflight, error, onSelectAnchor }: RateTableProps) {
+export function RateTable({ rates, isLoading, refreshInflight, error, onSelectAnchor, executeDisabled }: RateTableProps) {
   if ((isLoading || refreshInflight) && (!rates || rates.rates.length === 0)) {
     return (
       <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
@@ -121,7 +122,7 @@ export function RateTable({ rates, isLoading, refreshInflight, error, onSelectAn
                 <td className="px-4 py-3 text-right">
                   <button
                     onClick={() => onSelectAnchor(rate)}
-                    disabled={isUnavailable}
+                    disabled={isUnavailable || executeDisabled}
                     className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Off-ramp
