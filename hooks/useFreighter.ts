@@ -4,6 +4,8 @@ import type { FreighterState } from '@/types'
 
 const STORAGE_KEY = 'freighter_connected'
 const POLL_MS = 5000
+const EARLY_POLL_MS = 2000
+const EARLY_POLL_DURATION_MS = 30_000
 
 const INITIAL_STATE: FreighterState = {
   isInstalled: false,
@@ -26,8 +28,14 @@ export function useFreighter() {
 
   useEffect(() => {
     let cancelled = false
-    let intervalId: ReturnType<typeof setInterval> | null = null
+    let earlyIntervalId: ReturnType<typeof setInterval> | null = null
+    let earlyTimeoutId: ReturnType<typeof setTimeout> | null = null
+    let fallbackIntervalId: ReturnType<typeof setInterval> | null = null
     const watcherHandle = { current: null as { stop: () => void } | null }
+
+    function onVisibilityDetect() {
+      if (!cancelled) void detect()
+    }
 
     async function detect() {
       try {
@@ -71,6 +79,19 @@ export function useFreighter() {
     async function init() {
       await detect()
 
+      // Phase 1: poll every 2s for first 30s to catch mid-session install
+      earlyIntervalId = setInterval(() => { if (!cancelled) void detect() }, EARLY_POLL_MS)
+
+      earlyTimeoutId = setTimeout(() => {
+        if (earlyIntervalId) { clearInterval(earlyIntervalId); earlyIntervalId = null }
+        // Phase 2: event-driven detection after 30s
+        if (!cancelled) {
+          window.addEventListener('focus', onVisibilityDetect)
+          document.addEventListener('visibilitychange', onVisibilityDetect)
+        }
+      }, EARLY_POLL_DURATION_MS)
+
+      // Account/network change subscription (independent of install detection)
       try {
         const { WatchWalletChanges } = await import('@stellar/freighter-api')
         if (cancelled) return
@@ -98,9 +119,7 @@ export function useFreighter() {
         })
       } catch {
         // WatchWalletChanges unavailable; fall back to 5s polling
-        if (!cancelled) {
-          intervalId = setInterval(detect, POLL_MS)
-        }
+        if (!cancelled) fallbackIntervalId = setInterval(detect, POLL_MS)
       }
     }
 
@@ -108,8 +127,12 @@ export function useFreighter() {
 
     return () => {
       cancelled = true
+      if (earlyIntervalId) clearInterval(earlyIntervalId)
+      if (earlyTimeoutId) clearTimeout(earlyTimeoutId)
       watcherHandle.current?.stop()
-      if (intervalId) clearInterval(intervalId)
+      if (fallbackIntervalId) clearInterval(fallbackIntervalId)
+      window.removeEventListener('focus', onVisibilityDetect)
+      document.removeEventListener('visibilitychange', onVisibilityDetect)
     }
   }, [])
 
