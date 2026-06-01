@@ -70,7 +70,6 @@ export function useFreighter() {
 
     async function init() {
       await detect()
-      if (cancelled) return
 
       try {
         const { WatchWalletChanges } = await import('@stellar/freighter-api')
