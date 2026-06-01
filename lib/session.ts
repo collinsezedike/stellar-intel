@@ -4,6 +4,15 @@ export function generateNonce(): string {
   return crypto.randomUUID()
 }
 
+function isJwtExpired(jwt: string): boolean {
+  try {
+    const payload = JSON.parse(atob(jwt.split('.')[1])) as Record<string, unknown>
+    return typeof payload.exp === 'number' && Date.now() / 1000 > payload.exp
+  } catch {
+    return false
+  }
+}
+
 export function saveJwtToSession(nonce: string, jwt: string): void {
   try {
     sessionStorage.setItem(`${STORAGE_PREFIX}${nonce}`, jwt)
@@ -14,7 +23,13 @@ export function saveJwtToSession(nonce: string, jwt: string): void {
 
 export function loadJwtFromSession(nonce: string): string | null {
   try {
-    return sessionStorage.getItem(`${STORAGE_PREFIX}${nonce}`)
+    const jwt = sessionStorage.getItem(`${STORAGE_PREFIX}${nonce}`)
+    if (!jwt) return null
+    if (isJwtExpired(jwt)) {
+      sessionStorage.removeItem(`${STORAGE_PREFIX}${nonce}`)
+      return null
+    }
+    return jwt
   } catch {
     return null
   }
