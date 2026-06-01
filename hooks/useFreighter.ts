@@ -18,6 +18,7 @@ const INITIAL_STATE: FreighterState = {
 export function useFreighter() {
   const [state, setState] = useState<FreighterState>(INITIAL_STATE)
   const mountedRef = useRef(true)
+  const visibilityHandlerRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     mountedRef.current = true
@@ -33,9 +34,12 @@ export function useFreighter() {
     let fallbackIntervalId: ReturnType<typeof setInterval> | null = null
     const watcherHandle = { current: null as { stop: () => void } | null }
 
+    // Store in a ref so cleanup always removes the same instance that was
+    // registered, even if the component remounts and re-creates this closure.
     function onVisibilityDetect() {
       if (!cancelled) void detect()
     }
+    visibilityHandlerRef.current = onVisibilityDetect
 
     async function detect() {
       try {
@@ -131,8 +135,12 @@ export function useFreighter() {
       if (earlyTimeoutId) clearTimeout(earlyTimeoutId)
       watcherHandle.current?.stop()
       if (fallbackIntervalId) clearInterval(fallbackIntervalId)
-      window.removeEventListener('focus', onVisibilityDetect)
-      document.removeEventListener('visibilitychange', onVisibilityDetect)
+      const handler = visibilityHandlerRef.current
+      if (handler) {
+        window.removeEventListener('focus', handler)
+        document.removeEventListener('visibilitychange', handler)
+        visibilityHandlerRef.current = null
+      }
     }
   }, [])
 
