@@ -129,7 +129,11 @@ function hasReputationMetrics(metrics: ReputationMetrics): boolean {
 
 const STELLAR_EXPERT_TX_BASE = 'https://stellar.expert/explorer/public/tx';
 
-export function ScorecardCard({ anchorId, window: timeframe, latestOracleTxHash }: ScorecardCardProps) {
+export function ScorecardCard({
+  anchorId,
+  window: timeframe,
+  latestOracleTxHash,
+}: ScorecardCardProps) {
   const [metrics, setMetrics] = useState<ReputationMetrics>(emptyMetrics);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
