@@ -177,16 +177,24 @@ async function checkExistingDeployment(): Promise<void> {
     if (publisherSecret) {
       try {
         const publisherPubKey = Keypair.fromSecret(publisherSecret).publicKey();
-        const sameAsAdmin = publisherPubKey === gov.admin;
-        record(
-          'Publisher is not the contract admin',
-          sameAsAdmin ? 'fail' : 'pass',
-          sameAsAdmin
-            ? `PUBLISHER_SECRET is the contract admin (${publisherPubKey}) — ` +
-              'generate a dedicated publisher account, authorize it with add_publisher, ' +
-              'and set PUBLISHER_SECRET to that account; the admin key must not exist in any deployment environment'
-            : `publisher=${publisherPubKey}`
-        );
+        if (gov.admin === null) {
+          record(
+            'Publisher is not the contract admin',
+            'fail',
+            'admin() returned null — cannot verify separation; an uninitialised admin is not a separation of duties'
+          );
+        } else {
+          const sameAsAdmin = publisherPubKey === gov.admin;
+          record(
+            'Publisher is not the contract admin',
+            sameAsAdmin ? 'fail' : 'pass',
+            sameAsAdmin
+              ? `PUBLISHER_SECRET is the contract admin (${publisherPubKey}) — ` +
+                'generate a dedicated publisher account, authorize it with add_publisher, ' +
+                'and set PUBLISHER_SECRET to that account; the admin key must not exist in any deployment environment'
+              : `publisher=${publisherPubKey}`
+          );
+        }
       } catch (err) {
         record(
           'Publisher is not the contract admin',
