@@ -53,11 +53,11 @@ Both would have been repeated on mainnet.
 Three keys govern the contract. Each is a distinct Stellar account and none may
 be held by the same keypair as another.
 
-| Key | What it controls | Allowed in a deployment environment |
-| --- | ---------------- | ----------------------------------- |
-| **Admin** | Anchor registration, publisher authorization, and admin rotation (`propose_admin`/`accept_admin`). Operator-level changes to what the oracle covers and who can write to it. | No. Kept offline; used from an operator's machine only. |
-| **Upgrade admin** | WASM upgrades via `init_upgrade`/`upgrade`. Can replace the contract entirely. | No. Kept offline; separate multisig from the admin. |
-| **Publisher** | Submits outcomes and rates (`submit_outcome`, `set_corridor_metrics`, `publish_corridor_rate`). No authority over the registry, other publishers, or the contract itself. | Yes. `PUBLISHER_SECRET` in the Vercel production environment holds this key and nothing else. |
+| Key               | What it controls                                                                                                                                                             | Allowed in a deployment environment                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Admin**         | Anchor registration, publisher authorization, and admin rotation (`propose_admin`/`accept_admin`). Operator-level changes to what the oracle covers and who can write to it. | No. Kept offline; used from an operator's machine only.                                       |
+| **Upgrade admin** | WASM upgrades via `init_upgrade`/`upgrade`. Can replace the contract entirely.                                                                                               | No. Kept offline; separate multisig from the admin.                                           |
+| **Publisher**     | Submits outcomes and rates (`submit_outcome`, `set_corridor_metrics`, `publish_corridor_rate`). No authority over the registry, other publishers, or the contract itself.    | Yes. `PUBLISHER_SECRET` in the Vercel production environment holds this key and nothing else. |
 
 The admin key carries considerably more authority than the publisher: it can
 authorize or revoke any writer, begin an admin rotation, and alter what anchors
