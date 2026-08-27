@@ -596,7 +596,7 @@ export async function solveWithFallback(
 // and delegates planning to registered executors — no connector implementations
 // live here.
 
-export type HopKind = 'on-ramp' | 'swap' | 'yield';
+export type HopKind = 'on-ramp' | 'swap' | 'yield' | 'off-ramp';
 
 /** Minimal asset identifier used for hop-to-hop continuity checks. */
 export interface HopAssetRef {
