@@ -17,9 +17,7 @@ export function DocsSearch({ open, onClose }: DocsSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const results = DOCS_ROUTES.filter((r) =>
-    r.label.toLowerCase().includes(query.toLowerCase())
-  );
+  const results = DOCS_ROUTES.filter((r) => r.label.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {
     if (open) {
