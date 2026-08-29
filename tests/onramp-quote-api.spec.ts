@@ -4,9 +4,9 @@ import { NextRequest } from 'next/server';
 // Uncomment when app/api/onramp/quote/[corridor]/route.ts is implemented.
 // import { GET } from '@/app/api/onramp/quote/[corridor]/route';
 
-// Remove this stub and uncomment the import above once the route exists.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const GET: any = null;
+// Stub replaced by the real import above once the route exists.
+// Returns 501 so that any accidental un-skip without the real route fails loudly.
+const GET = async (..._args: unknown[]): Promise<Response> => new Response(null, { status: 501 });
 
 // ─── Contract types ───────────────────────────────────────────────────────────
 //
